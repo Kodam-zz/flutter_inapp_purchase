@@ -17,18 +17,15 @@ import io.flutter.plugin.common.PluginRegistry.Registrar;
 public class FlutterInappPurchasePlugin implements FlutterPlugin, ActivityAware {
 
   private AndroidInappPurchasePlugin androidInappPurchasePlugin;
-  private AmazonInappPurchasePlugin amazonInappPurchasePlugin;
   private Context context;
   private MethodChannel channel;
 
   private static boolean isAndroid;
-  private static boolean isAmazon;
 
   @Override
   public void onAttachedToEngine(@NonNull FlutterPluginBinding binding) {
     context = binding.getApplicationContext();
     isAndroid = isPackageInstalled(context, "com.android.vending");
-    isAmazon = isPackageInstalled(context, "com.amazon.venezia");
 
     if (isAndroid) {
       androidInappPurchasePlugin = new AndroidInappPurchasePlugin();
@@ -36,19 +33,12 @@ public class FlutterInappPurchasePlugin implements FlutterPlugin, ActivityAware 
 
       setupMethodChannel(binding.getBinaryMessenger(), androidInappPurchasePlugin);
 
-    } else if(isAmazon) {
-      amazonInappPurchasePlugin = new AmazonInappPurchasePlugin();
-      amazonInappPurchasePlugin.setContext(context);
-
-      setupMethodChannel(binding.getBinaryMessenger(), amazonInappPurchasePlugin);
-    }
+    } 
   }
 
   @Override
   public void onDetachedFromEngine(@NonNull FlutterPluginBinding binding) {
     if (isPackageInstalled(context, "com.android.vending")) {
-      tearDownChannel();
-    } else if(isPackageInstalled(context, "com.amazon.venezia")) {
       tearDownChannel();
     }
   }
@@ -63,13 +53,6 @@ public class FlutterInappPurchasePlugin implements FlutterPlugin, ActivityAware 
 
       plugin.setupMethodChannel(registrar.messenger(), androidInappPurchasePlugin);
       plugin.setAndroidInappPurchasePlugin(androidInappPurchasePlugin);
-    } else if(isAmazon) {
-      AmazonInappPurchasePlugin amazonInappPurchasePlugin = new AmazonInappPurchasePlugin();
-      amazonInappPurchasePlugin.setContext(registrar.context());
-      amazonInappPurchasePlugin.setActivity(registrar.activity());
-
-      plugin.setupMethodChannel(registrar.messenger(), amazonInappPurchasePlugin);
-      plugin.setAmazonInappPurchasePlugin(amazonInappPurchasePlugin);
     }
   }
 
@@ -77,8 +60,6 @@ public class FlutterInappPurchasePlugin implements FlutterPlugin, ActivityAware 
   public void onAttachedToActivity(@NonNull ActivityPluginBinding binding) {
     if (isPackageInstalled(context, "com.android.vending")) {
       androidInappPurchasePlugin.setActivity(binding.getActivity());
-    } else if(isPackageInstalled(context, "com.amazon.venezia")) {
-      amazonInappPurchasePlugin.setActivity(binding.getActivity());
     }
   }
 
@@ -87,8 +68,6 @@ public class FlutterInappPurchasePlugin implements FlutterPlugin, ActivityAware 
     if (isPackageInstalled(context, "com.android.vending")) {
       androidInappPurchasePlugin.setActivity(null);
       androidInappPurchasePlugin.onDetachedFromActivity();
-    } else if(isPackageInstalled(context, "com.amazon.venezia")) {
-      amazonInappPurchasePlugin.setActivity(null);
     }
   }
 
@@ -126,8 +105,6 @@ public class FlutterInappPurchasePlugin implements FlutterPlugin, ActivityAware 
   private void setChannelByPlatform(MethodChannel channel) {
     if(isAndroid) {
       androidInappPurchasePlugin.setChannel(channel);
-    } else if (isAmazon) {
-      amazonInappPurchasePlugin.setChannel(channel);
     }
   }
 
@@ -135,7 +112,4 @@ public class FlutterInappPurchasePlugin implements FlutterPlugin, ActivityAware 
     this.androidInappPurchasePlugin = androidInappPurchasePlugin;
   }
 
-  private void setAmazonInappPurchasePlugin(AmazonInappPurchasePlugin amazonInappPurchasePlugin) {
-    this.amazonInappPurchasePlugin = amazonInappPurchasePlugin;
-  }
 }
